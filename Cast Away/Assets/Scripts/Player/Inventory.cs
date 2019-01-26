@@ -49,6 +49,10 @@ public class Inventory
 
     public void SetItemIdx(int aNewIdx)
     {
+        if (aNewIdx <=0)
+        {
+            aNewIdx = 0;
+        }
         mItemIndex = aNewIdx;
         UIManager.Instance.HotBar.SetSelected(mItemIndex);
     }

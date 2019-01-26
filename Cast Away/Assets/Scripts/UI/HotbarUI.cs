@@ -21,6 +21,10 @@ public class HotbarUI : MonoBehaviour
 
     public void SetSelected(int aSelectedIndex)
     {
+        if (aSelectedIndex <= 0)
+        {
+            aSelectedIndex = 0;
+        }
         Debug.Log("Setting selecteditem " + aSelectedIndex);
         mSlots[mCurrentSelectedIndex].OnDeselect();
         mSlots[aSelectedIndex].SetSelected();

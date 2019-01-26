@@ -48,6 +48,9 @@ public class CraftableInteractable : BaseInteractable
     public CraftingRequirements[] mRequirements;
 
     private CraftingResources ui_Resources;
+
+    public bool InteractableCraft = false;
+    public bool DestroyOnceComplete = true;
     private void Start()
     {
         ui_Resources = UIManager.Instance.CraftingRequirementsObject.GetResourceIndicatorContainerInstance(this.gameObject);
@@ -69,6 +72,11 @@ public class CraftableInteractable : BaseInteractable
             }
         }
         ui_Resources.UpdateLocation(requirementsLeft, this.gameObject);
+    }
+
+    private void Update()
+    {
+        UpdateRequirementLocation();
     }
 
     public override void Interact()
@@ -106,6 +114,7 @@ public class CraftableInteractable : BaseInteractable
 
     public bool isCompleted(out Item item)
     {
+        item = null;
         for (int i = 0; i < mRequirements.Length; i++)
         {
             if (!mRequirements[i].IsCompleted())
@@ -114,8 +123,12 @@ public class CraftableInteractable : BaseInteractable
                 return false;
             }
         }
-        Item itemInstnace = Instantiate(itemScriptableObject);
-        item = itemInstnace;
+        if (!InteractableCraft)
+        {
+            Item itemInstnace = Instantiate(itemScriptableObject);
+            item = itemInstnace;
+        }
+        this.GetComponent<Collider2D>().enabled = false;
         return true;
     }
 

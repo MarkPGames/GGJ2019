@@ -3,11 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-enum PlayerState
+public enum PlayerState
 {
     NORMAL,
     HARVESTING,
-    SLEEPING,
+    FAINT,
+    REPLENISHING
 }
 
 public class PlayerController : MonoBehaviour
@@ -23,11 +24,17 @@ public class PlayerController : MonoBehaviour
     private PlayerState mState = PlayerState.NORMAL;
     private IEnumerator runningRoutine = null;
 
+    PlayerResources mResources;
     [SerializeField]
     private float raycastRange = 10;
+
+    [SerializeField]
+    private float timeToDepleteResources = 5f;
+    private float timer = 0;
     private void Awake()
     {
         _rigidBody = this.GetComponent<Rigidbody2D>();
+        mResources = this.GetComponent<PlayerResources>();
     }
 
     // Use this for initialization
@@ -43,9 +50,14 @@ public class PlayerController : MonoBehaviour
         mInventory.SetItemIdx(0);
     }
 
+
     // Update is called once per frame
     void Update()
     {
+        mResources.DepleteResource(PlayerResoureType.THIRST);
+        mResources.DepleteResource(PlayerResoureType.HUNGER);
+
+
         switch (mState)
         {
             case PlayerState.NORMAL:
@@ -55,7 +67,9 @@ public class PlayerController : MonoBehaviour
                 break;
             case PlayerState.HARVESTING:
                 break;
-            case PlayerState.SLEEPING:
+            case PlayerState.FAINT:
+                break;
+            case PlayerState.REPLENISHING:
                 break;
         }
     }
@@ -84,31 +98,65 @@ public class PlayerController : MonoBehaviour
                     interactable.Interact();
                     if (interactable is ResourceInteractable)
                     {
-                        ChangeState(PlayerState.HARVESTING, interactable);
-                    }
-                    else if(interactable is CraftableInteractable)
-                    {
-                        CraftableInteractable craftable = (interactable as CraftableInteractable);
-                        craftable.Interact(mInventory.GetCurrentItem());
-
-                        Item craftedItem = null;
-                        if (craftable.isCompleted(out craftedItem))
+                        ResourceInteractable resource = (interactable as ResourceInteractable);
+                        if (resource.ToolRequired)
                         {
-                            if (mInventory.ContainsItem(craftable.itemScriptableObject))
+                            if (mInventory.GetCurrentItem() != null)
                             {
-                                for (int i = 0; i < mInventory.m_Items.Count; i++)
+                                if (mInventory.GetCurrentItem().ItemType == ItemType.TOOL && mInventory.GetCurrentItem().ToolType == resource.toolTypeRequired)
                                 {
-                                    if (mInventory.m_Items[i].ItemType == ItemType.TOOL && mInventory.m_Items[i].ToolType == craftedItem.ToolType)
-                                    {
-                                        mInventory.m_Items[i].IncreaseQuantity(1);
-                                    }
+                                    ChangeState(PlayerState.HARVESTING, interactable);
                                 }
                             }
-                            else
+                        }
+                        else
+                        {
+                            ChangeState(PlayerState.HARVESTING, interactable);
+
+                        }
+                    }
+                    else if (interactable is CraftableInteractable)
+                    {
+                        if (mInventory.GetCurrentItem())
+                        {
+                            CraftableInteractable craftable = (interactable as CraftableInteractable);
+                            craftable.Interact(mInventory.GetCurrentItem());
+
+                            Item craftedItem = null;
+                            if (craftable.isCompleted(out craftedItem))
                             {
-                                //Create a new item
-                                craftedItem.IncreaseQuantity(1);
-                                mInventory.AddNewItem(craftedItem);
+                                if (mInventory.ContainsItem(craftable.itemScriptableObject))
+                                {
+                                    for (int i = 0; i < mInventory.m_Items.Count; i++)
+                                    {
+                                        if (mInventory.m_Items[i].ItemType == ItemType.TOOL && mInventory.m_Items[i].ToolType == craftedItem.ToolType)
+                                        {
+                                            mInventory.m_Items[i].IncreaseQuantity(1);
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    //Create a new item
+                                    craftedItem.IncreaseQuantity(1);
+                                    mInventory.AddNewItem(craftedItem);
+                                }
+                                mResources.DepleteResource(PlayerResoureType.STAMINA);
+                                if (craftable.DestroyOnceComplete)
+                                {
+                                    Destroy(craftable.gameObject);
+                                }
+                            }
+                        }
+                    }
+                    else if (interactable is PlayerResourceInteractable)
+                    {
+                        PlayerResourceInteractable playerResource = (interactable as PlayerResourceInteractable);
+                        if (playerResource.waitForCraftable)
+                        {
+                            if (playerResource.isReady())
+                            {
+                                ChangeState(PlayerState.REPLENISHING, playerResource);
                             }
                         }
                     }
@@ -176,13 +224,147 @@ public class PlayerController : MonoBehaviour
             newItem.IncreaseQuantity(resource.Interact(mInventory.GetCurrentItem()));
             mInventory.AddNewItem(newItem);
         }
+
+        if (resource.secondaryHarvest)
+        {
+
+            if (mInventory.ContainsItem(resource.secondaryHarvestItem))
+            {
+                for (int i = 0; i < mInventory.m_Items.Count; i++)
+                {
+                    if (mInventory.m_Items[i].ItemType == ItemType.RESOURCE && mInventory.m_Items[i].ResourceType == resource.SecondaryResourceType)
+                    {
+                        mInventory.m_Items[i].IncreaseQuantity(resource.Interact(mInventory.GetCurrentItem()));
+                    }
+                }
+            }
+            else
+            {
+                //Create a new item
+                Item newItem = Instantiate(resource.secondaryHarvestItem);
+                newItem.IncreaseQuantity(resource.Interact(mInventory.GetCurrentItem()));
+                mInventory.AddNewItem(newItem);
+            }
+        }
+
+        resource.ItemHarvested();
+        if (resource.limitedResource)
+        {
+            if (resource.DepletedResource)
+            {
+                Destroy(resource.gameObject);
+            }
+        }
+        mResources.DepleteResource(PlayerResoureType.STAMINA);
         //Do the harvesting things
 
         ChangeState(PlayerState.NORMAL);
         yield return null;
     }
 
-    private void ChangeState(PlayerState newState, BaseInteractable interactingWith = null)
+    private void ReplenishingState(BaseInteractable interactable)
+    {
+        if (interactable is PlayerResourceInteractable)
+        {
+            PlayerResourceInteractable resource = (PlayerResourceInteractable)interactable;
+            if (resource.ReplenishType == PlayerResoureType.STAMINA)
+            {
+                mResources.DepleteResource(PlayerResoureType.HUNGER, true);
+                mResources.DepleteResource(PlayerResoureType.THIRST, true);
+            }
+            runningRoutine = ResourceReplenishRoutine(resource);
+            StartCoroutine(runningRoutine);
+        }
+        else
+        {
+            ChangeState(PlayerState.NORMAL);
+        }
+    }
+    private IEnumerator ResourceReplenishRoutine(PlayerResourceInteractable interactable)
+    {
+        this._rigidBody.velocity = Vector2.zero;
+
+        yield return null;
+        float timer = 0;
+        ProgressBar bar = null;
+        if (!interactable.blackScreen)
+        {
+            bar = UIManager.Instance.GetProgressBar(interactable.gameObject);
+        }
+        while (timer <= interactable.m_fReplenishTime)
+        {
+            this._rigidBody.velocity = Vector2.zero;
+            timer += Time.deltaTime;
+            if (interactable.blackScreen)
+            {
+                UIManager.Instance.SetBlackoutProgress(timer / interactable.m_fReplenishTime);
+            }
+            else
+            {
+                bar.SetProgress(timer / interactable.m_fReplenishTime);
+            }
+            yield return null;
+        }
+
+
+        if (interactable.blackScreen)
+        {
+            while (timer >= 0)
+            {
+                this._rigidBody.velocity = Vector2.zero;
+                timer -= Time.deltaTime;
+                UIManager.Instance.SetBlackoutProgress(timer / interactable.m_fReplenishTime);
+                yield return null;
+            }
+        }
+        if (bar != null)
+        {
+            Destroy(bar.gameObject);
+        }
+        mResources.ReplenishResource(interactable.ReplenishType, interactable.replenishRate);
+        ChangeState(PlayerState.NORMAL);
+    }
+
+    private void FaintState()
+    {
+        runningRoutine = FaintRoutine();
+        StartCoroutine(runningRoutine);
+    }
+
+    private IEnumerator FaintRoutine()
+    {
+        this._rigidBody.velocity = Vector2.zero;
+
+        yield return null;
+        float timer = 0;
+        while (timer <= 2)
+        {
+            this._rigidBody.velocity = Vector2.zero;
+            timer += Time.deltaTime;
+
+            UIManager.Instance.SetBlackoutProgress(timer / 2);
+
+            yield return null;
+        }
+        if (!mResources.GameOver)
+        {
+            while (timer >= 0)
+            {
+                this._rigidBody.velocity = Vector2.zero;
+                timer -= Time.deltaTime;
+                UIManager.Instance.SetBlackoutProgress(timer / 2);
+                yield return null;
+            }
+            mResources.OnFainted();
+            ChangeState(PlayerState.NORMAL);
+        }
+        else
+        {
+            UIManager.Instance.ShowGameOver();
+        }
+    }
+
+    public void ChangeState(PlayerState newState, BaseInteractable interactingWith = null)
     {
         switch (newState)
         {
@@ -191,7 +373,11 @@ public class PlayerController : MonoBehaviour
             case PlayerState.HARVESTING:
                 HarvestingState(interactingWith);
                 break;
-            case PlayerState.SLEEPING:
+            case PlayerState.FAINT:
+                FaintState();
+                break;
+            case PlayerState.REPLENISHING:
+                ReplenishingState(interactingWith);
                 break;
             default:
                 break;

@@ -32,6 +32,13 @@ public class Item : ScriptableObject
     private HarvestableResource mResourceType = HarvestableResource.WOOD;
     public HarvestableResource ResourceType { get { return mResourceType; } }
 
+
+    [SerializeField]
+    private HarvestableResource mSecondaryResource = HarvestableResource.LEAF;
+    public HarvestableResource SecondaryResourceType { get { return mSecondaryResource; } }
+
+
+    [SerializeField]
     private ToolType mToolType = ToolType.AXE;
     public ToolType ToolType { get { return mToolType; } }
 

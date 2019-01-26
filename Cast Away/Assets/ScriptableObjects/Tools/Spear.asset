@@ -8,11 +8,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 53c3c464e42773c42b886c6d03630449, type: 3}
+  m_Script: {fileID: 11500000, guid: a003ad8f944de2743b59f33a7a8db8e4, type: 3}
   m_Name: Spear
   m_EditorClassIdentifier: 
-  objectName: Spear
+  objectName: 
   mItemType: 1
   mResourceType: 0
-  mSprite: {fileID: 21300000, guid: 1e2d444ae9d5a4ff1b47ffec28d5165c, type: 3}
-  itemAmount: 1
+  mSecondaryResource: 0
+  mToolType: 1
+  mSprite: {fileID: 21300000, guid: 7107e88f3308b2d44bf80f3eb4e8e57b, type: 3}
+  itemAmount: 0

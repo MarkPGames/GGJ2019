@@ -34,7 +34,7 @@ public class CraftingResources : MonoBehaviour
         {
             followingObject = followObject;
         }
-
+        
         this.transform.position = Camera.main.WorldToScreenPoint(followingObject.transform.position) + Vector3.up * (30 * requirementsRemaining);
 
     }

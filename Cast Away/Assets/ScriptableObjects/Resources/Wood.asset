@@ -8,11 +8,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 53c3c464e42773c42b886c6d03630449, type: 3}
+  m_Script: {fileID: 11500000, guid: a003ad8f944de2743b59f33a7a8db8e4, type: 3}
   m_Name: Wood
   m_EditorClassIdentifier: 
-  objectName: Wood
+  objectName: 
   mItemType: 0
   mResourceType: 0
-  mSprite: {fileID: 21300000, guid: b628eb10933a46643a04565a8b982552, type: 3}
+  mSecondaryResource: 0
+  mToolType: 0
+  mSprite: {fileID: 21300000, guid: ee72b81ebd16ac94aafef7f70864f487, type: 3}
   itemAmount: 0

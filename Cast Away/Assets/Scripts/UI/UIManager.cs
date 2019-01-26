@@ -1,7 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.UI;
+using TMPro;
 public class UIManager : MonoBehaviour
 {
 
@@ -23,13 +24,22 @@ public class UIManager : MonoBehaviour
 
     [SerializeField]
     private HotbarUI mHotBar;
-    public HotbarUI HotBar { get { return mHotBar; }}
+    public HotbarUI HotBar { get { return mHotBar; } }
 
     [SerializeField]
     private CraftingResources requirementsObject;
     public CraftingResources CraftingRequirementsObject { get { return requirementsObject; } }
 
+    [SerializeField]
+    private Image blackout;
 
+    [SerializeField]
+    private TMPro.TextMeshProUGUI gameOverText;
+
+    private void Start()
+    {
+        blackout.color = new Color(0, 0, 0, 0);
+    }
     public ProgressBar GetProgressBar(GameObject aFollowObject)
     {
         ProgressBar createdBar = null;
@@ -42,5 +52,18 @@ public class UIManager : MonoBehaviour
             createdBar.transform.position = Camera.main.WorldToScreenPoint(aFollowObject.transform.position);
         }
         return createdBar;
+    }
+
+    public void ShowGameOver()
+    {
+        gameOverText.gameObject.SetActive(true);
+    }
+
+    public void SetBlackoutProgress(float progress)
+    {
+        if (blackout)
+        {
+            blackout.color = new Color(0, 0, 0, progress);
+        }
     }
 }
