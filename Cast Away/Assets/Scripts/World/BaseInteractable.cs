@@ -4,7 +4,7 @@ using UnityEngine;
 
 public abstract class BaseInteractable : MonoBehaviour
 {
+    public Item itemScriptableObject;
     public abstract void Interact();
-
 
 }
