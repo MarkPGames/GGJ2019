@@ -86,7 +86,7 @@ Rigidbody2D:
   m_UseAutoMass: 0
   m_Mass: 1
   m_LinearDrag: 0
-  m_AngularDrag: 0.05
+  m_AngularDrag: 0
   m_GravityScale: 0
   m_Material: {fileID: 0}
   m_Interpolate: 0
@@ -129,11 +129,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cc57e4c8b1471748aa4f660d9e4361a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_fMovementSpeed: 5
+  m_fMovementSpeed: 2
   mInventory:
-    m_Items:
-    - {fileID: 11400000, guid: c2f7c3d4f643ad24eabd45bcfeedf716, type: 2}
+    defaultItems: []
+    m_Items: []
     mItemIndex: 0
+  raycastRange: 10
 --- !u!114 &114822054993260836
 MonoBehaviour:
   m_ObjectHideFlags: 1
