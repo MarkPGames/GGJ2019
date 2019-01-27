@@ -22,19 +22,23 @@ public class PlayerResourceInteractable : BaseInteractable
 
     private Collider2D mCollider;
 
+    public Sprite ResourceSprite;
+
     private void Start()
     {
         mCollider = this.GetComponent<Collider2D>();
     }
     public override void Interact(/*There should be a callback here, too late for that*/)
     {
-        Debug.Log("What's the point of this again?");
         //throw new System.NotImplementedException();
     }
 
     private void Update()
     {
-        mCollider.enabled = isReady();
+        if (waitForCraftable)
+        {
+            mCollider.enabled = isReady();
+        }
     }
     public bool isReady()
     {

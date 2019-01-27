@@ -20,4 +20,9 @@ public class CraftingResourceIndicator : MonoBehaviour
         mImage.sprite = aResourceImage;
     }
 
+    public void SetScale(Vector3 scale)
+    {
+        mImage.transform.localScale = scale;
+    }
+
 }

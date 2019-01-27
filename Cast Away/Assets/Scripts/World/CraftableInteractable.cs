@@ -8,7 +8,6 @@ public struct CraftingRequirements
     public Item mResourceRequired;
     public int mResourceCountRequired;
     public CraftingResourceIndicator mIndicatorUI;
-
     [SerializeField]
     private int gatheredResources;
     public void AddResource(int aAmount)
@@ -49,6 +48,12 @@ public class CraftableInteractable : BaseInteractable
 
     private CraftingResources ui_Resources;
 
+    [SerializeField]
+    private SpriteRenderer craftingSprite;
+
+    [SerializeField]
+    private ChangeChildrenAlpha craftingSprites;
+
     public bool InteractableCraft = false;
     public bool DestroyOnceComplete = true;
     private void Start()
@@ -74,9 +79,44 @@ public class CraftableInteractable : BaseInteractable
         ui_Resources.UpdateLocation(requirementsLeft, this.gameObject);
     }
 
+    public int RequirementsLeft()
+    {
+        int requirementsLeft = 0;
+        for (int i = 0; i < mRequirements.Length; i++)
+        {
+            if (!mRequirements[i].IsCompleted())
+            {
+                requirementsLeft++;
+            }
+        }
+        return requirementsLeft;
+    }
+
+    public int RequirementsCompleted()
+    {
+        int requirementsCompleted = 0;
+        for (int i = 0; i < mRequirements.Length; i++)
+        {
+            if (mRequirements[i].IsCompleted())
+            {
+                requirementsCompleted++;
+            }
+        }
+        return requirementsCompleted;
+    }
+
     private void Update()
     {
         UpdateRequirementLocation();
+
+        if (craftingSprite)
+        {
+            craftingSprite.color = Color.Lerp(new Color(0,0,0,0.3f), Color.white, (float)RequirementsCompleted() / (float)mRequirements.Length);
+        }
+        if (craftingSprites != null)
+        {
+            craftingSprites.SetAlpha(Color.Lerp(new Color(0, 0, 0, 0.3f), Color.white, (float)RequirementsCompleted() / (float)mRequirements.Length));
+        }
     }
 
     public override void Interact()

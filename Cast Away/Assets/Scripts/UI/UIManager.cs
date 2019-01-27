@@ -33,6 +33,14 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private Image blackout;
 
+
+    [SerializeField]
+    public GameObject WinObject;
+
+
+    public Image HeartImage;
+
+
     [SerializeField]
     private TMPro.TextMeshProUGUI gameOverText;
 
@@ -50,6 +58,20 @@ public class UIManager : MonoBehaviour
         if (createdBar != null)
         {
             createdBar.transform.position = Camera.main.WorldToScreenPoint(aFollowObject.transform.position);
+        }
+        return createdBar;
+    }
+
+    public ProgressBar GetProgressBar(Vector3 worldPos)
+    {
+        ProgressBar createdBar = null;
+        if (mProgressBar)
+        {
+            createdBar = Instantiate(mProgressBar, this.transform);
+        }
+        if (createdBar != null)
+        {
+            createdBar.transform.position = Camera.main.WorldToScreenPoint(worldPos);
         }
         return createdBar;
     }

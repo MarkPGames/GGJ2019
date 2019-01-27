@@ -37,7 +37,7 @@ public class Item : ScriptableObject
     private HarvestableResource mSecondaryResource = HarvestableResource.LEAF;
     public HarvestableResource SecondaryResourceType { get { return mSecondaryResource; } }
 
-
+    public Vector3 spriteScale;
     [SerializeField]
     private ToolType mToolType = ToolType.AXE;
     public ToolType ToolType { get { return mToolType; } }

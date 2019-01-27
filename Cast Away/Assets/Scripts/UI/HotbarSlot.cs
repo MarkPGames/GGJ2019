@@ -21,6 +21,7 @@ public class HotbarSlot : MonoBehaviour
     {
         itemSprite.sprite = aItem.ItemSprite;
         itemSprite.color = Color.white;
+        itemSprite.transform.localScale = aItem.spriteScale;
         mQuantityText.text = aItem.itemAmount.ToString();
     }
 
@@ -36,8 +37,9 @@ public class HotbarSlot : MonoBehaviour
     public void ResetToNull()
     {
         mSelectionSprite.color = Color.white;
-        itemSprite.color = Color.black;
+        itemSprite.color = Color.white;
         itemSprite.sprite = defaultSprite;
+        itemSprite.transform.localScale = Vector3.one;
         mQuantityText.text = "0";
     }
 }

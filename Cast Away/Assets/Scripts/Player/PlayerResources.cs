@@ -43,39 +43,28 @@ public struct PlayerResource
         m_fCurrent -= a_fDepleteAmount;
     }
 
-    public void Deplete(bool hungerDepleted, bool thirstDepleted, bool doubleRate = false)
+    public void Deplete(bool doubleRate = false, bool reducedRate = false)
     {
         //Really hacky but outta time
-        float multiplier = 1500;
+        float multiplier = 100;
+        float reductionRate = 0.5f;
+
+        float tempResourceReductionRate = ReductionRate;
+        if (doubleRate)
+        {
+            tempResourceReductionRate *= multiplier;
+        }
+        if (reducedRate)
+        {
+            tempResourceReductionRate *= reductionRate;
+        }
         if (!depleteViaDelta)
         {
-            if (hungerDepleted || thirstDepleted)
-            {
-                m_fCurrent -= ReductionRate * 4 * Mathf.Max(1, (multiplier * System.Convert.ToInt32(doubleRate)));
-            }
-            else if (hungerDepleted && thirstDepleted)
-            {
-                m_fCurrent -= ReductionRate * 2 * Mathf.Max(1, (multiplier * System.Convert.ToInt32(doubleRate)));
-            }
-            else
-            {
-                m_fCurrent -= ReductionRate * Mathf.Max(1, (multiplier * System.Convert.ToInt32(doubleRate)));
-            }
+            m_fCurrent -=tempResourceReductionRate;
         }
         else
         {
-            if (hungerDepleted || thirstDepleted)
-            {
-                m_fCurrent -= ReductionRate * 4 * Mathf.Max(1, (multiplier * System.Convert.ToInt32(doubleRate))) * Time.deltaTime;
-            }
-            else if (hungerDepleted && thirstDepleted)
-            {
-                m_fCurrent -= ReductionRate * 2 * Mathf.Max(1, (multiplier * System.Convert.ToInt32(doubleRate))) * Time.deltaTime;
-            }
-            else
-            {
-                m_fCurrent -= ReductionRate * Mathf.Max(1, (multiplier * System.Convert.ToInt32(doubleRate))) * Time.deltaTime;
-            }
+            m_fCurrent -= tempResourceReductionRate * Time.deltaTime;
         }
 
         if (m_fCurrent <= 0)
@@ -137,7 +126,10 @@ public class PlayerResources : MonoBehaviour
 
     private void Update()
     {
-
+        if (m_resources[(int)PlayerResoureType.HUNGER].Depleted || m_resources[(int)PlayerResoureType.THIRST].Depleted)
+        {
+            m_resources[(int)PlayerResoureType.STAMINA].Deplete(false, true);
+        }
     }
 
 
@@ -158,16 +150,19 @@ public class PlayerResources : MonoBehaviour
 
         if (a_resourceType == PlayerResoureType.STAMINA)
         {
-            m_resources[(int)a_resourceType].Deplete(hungerDepleted, thirstDepletd, doubleRate);
+            m_resources[(int)a_resourceType].Deplete(doubleRate);
         }
         else
         {
-            m_resources[(int)a_resourceType].Deplete(false, false, doubleRate);
+            m_resources[(int)a_resourceType].Deplete(doubleRate);
         }
-
+        if (_playerController.CurrentState == PlayerState.FAINT)
+        {
+            return;
+        }
         if (m_resources[(int)PlayerResoureType.STAMINA].Depleted)
         {
-            _playerController.ChangeState(PlayerState.FAINT);
+            _playerController.ChangeState(PlayerState.FAINT, Vector3.zero);
         }
     }
 }

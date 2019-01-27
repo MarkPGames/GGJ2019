@@ -15,6 +15,7 @@ public class CraftingResources : MonoBehaviour
         CraftingResourceIndicator indicator = Instantiate(mIndicatorPrefab, this.transform);
         indicator.SetCraftingAmount(craftingAmount);
         indicator.SetResourceImage(aResourceType.ItemSprite);
+        indicator.SetScale(aResourceType.spriteScale);
         mIndicators.Add(indicator);
         return indicator;
     }
@@ -35,7 +36,7 @@ public class CraftingResources : MonoBehaviour
             followingObject = followObject;
         }
         
-        this.transform.position = Camera.main.WorldToScreenPoint(followingObject.transform.position) + Vector3.up * (30 * requirementsRemaining);
+        this.transform.position = Camera.main.WorldToScreenPoint(followingObject.transform.position) + Vector3.up * (40 * requirementsRemaining);
 
     }
 

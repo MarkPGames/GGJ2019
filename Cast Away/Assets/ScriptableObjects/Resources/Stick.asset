@@ -15,6 +15,7 @@ MonoBehaviour:
   mItemType: 0
   mResourceType: 4
   mSecondaryResource: 0
+  spriteScale: {x: 1.5, y: 1.5, z: 1.5}
   mToolType: 0
   mSprite: {fileID: 21300000, guid: 7fc6dde68c3ab2e4aaaae733650e49d5, type: 3}
   itemAmount: 0
